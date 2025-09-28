@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
+    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://www.googleapis.com https://www.gstatic.cn https://apis.google.com; 
+    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; 
+    img-src 'self' data: https:; 
+    font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; 
+    connect-src 'self' https://firestore.googleapis.com https://firebase.googleapis.com https://www.googleapis.com;" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+  <title>BOOYAH APEX — Free Fire Tournament</title>
+ <!-- Standard .ico file -->
+<link rel="icon" href="song/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #ffb703;
+      --accent-dark: #e6a503;
+      --muted: #9aa4b2;
+      --glass: rgba(255,255,255,0.04);
+      --text: #e6eef8;
+      --shadow: rgba(2,6,23,0.6);
+      --success: #4ade80;
+      --discord: #5865F2;
+      --error: #f87171;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #071024 0%, #071428 100%);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+    
+    /* Header Styles */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      margin-bottom: 20px;
+    }
+    
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .logo {
+      width: 56px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    
+    .logo:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(255, 183, 3, 0.4);
+    }
+    
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 600;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    nav a:hover {
+      color: var(--accent);
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    /* Hero Section */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 28px;
+      align-items: center;
+      padding: 36px 0;
+      margin-bottom: 40px;
+    }
+    
+    .hero-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px var(--shadow);
+      border: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hero-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(2,6,23,0.8);
+    }
+    
+    h1 {
+      margin: 0 0 12px;
+      font-size: 32px;
+      letter-spacing: 0.4px;
+      background: linear-gradient(to right, var(--accent), #ff7b54);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    p.lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+    
+    .cta {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: #071222;
+      box-shadow: 0 5px 15px rgba(255, 183, 3, 0.3);
+    }
+    
+    .btn-primary:hover {
+      background: var(--accent-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 183, 3, 0.4);
+    }
+    
+    .btn-highlight {
+      background: linear-gradient(135deg, #ff7b54, #ffb703);
+      color: #071222;
+      box-shadow: 0 5px 15px rgba(255, 123, 84, 0.4);
+      animation: pulse 2s infinite;
+    }
+    
+    .btn-highlight:hover {
+      background: linear-gradient(135deg, #ff6b42, #e6a503);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 123, 84, 0.6);
+      animation: none;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 5px 15px rgba(255, 123, 84, 0.4);
+      }
+      50% {
+        box-shadow: 0 5px 20px rgba(255, 123, 84, 0.7);
+      }
+      100% {
+        box-shadow: 0 5px 15px rgba(255, 123, 84, 0.4);
+      }
+    }
+    
+    .btn-discord {
+      background: var(--discord);
+      color: white;
+      box-shadow: 0 5px 15px rgba(88, 101, 242, 0.3);
+    }
+    
+    .btn-discord:hover {
+      background: #4752c4;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+    }
+    
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(255, 183, 3, 0.2);
+    }
+    
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    
+    .stat {
+      background: var(--glass);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 110px;
+      flex: 1;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .stat:hover {
+      transform: translateY(-5px);
+      background: rgba(255,255,255,0.06);
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 28px;
+    }
+    
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(2,6,23,0.7);
+      border-color: rgba(255, 183, 3, 0.2);
+    }
+    
+    .download {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    
+    .download .apk {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.03);
+      transition: all 0.3s ease;
+    }
+    
+    .download .apk:hover {
+      transform: translateX(5px);
+      border-color: rgba(255, 183, 3, 0.2);
+    }
+    
+    .contact {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 28px;
+      margin-top: 40px;
+    }
+    
+    .form input, .form textarea, .form select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: inherit;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    
+    .form input:focus, .form textarea:focus, .form select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(255, 183, 3, 0.2);
+    }
+    
+    footer {
+      margin-top: 60px;
+      padding: 24px 0;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .quick-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .quick-links a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .quick-links a:hover {
+      color: var(--accent);
+    }
+    
+    .developer-credit {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .developer-credit a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    /* Social Media Links */
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .social-link:hover {
+      background: var(--accent);
+      color: #071222;
+      transform: translateY(-3px);
+    }
+    
+    .social-link.facebook:hover {
+      background: #1877F2;
+      color: white;
+    }
+    
+    .social-link.discord:hover {
+      background: var(--discord);
+      color: white;
+    }
+    
+    .social-link.youtube:hover {
+      background: #FF0000;
+      color: white;
+    }
+    
+    .social-link.instagram:hover {
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      color: white;
+    }
+    
+    /* Background Effects */
+    .parallax-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 20% 50%, rgba(255, 183, 3, 0.05) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(255, 123, 84, 0.05) 0%, transparent 50%);
+    }
+    
+    .floating-elements {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+      z-index: -1;
+    }
+    
+    .floating-element {
+      position: absolute;
+      background: rgba(255, 183, 3, 0.1);
+      border-radius: 50%;
+      animation: float 15s infinite linear;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-20px) rotate(180deg);
+      }
+      100% {
+        transform: translateY(0) rotate(360deg);
+      }
+    }
+    
+    /* Tournament Details */
+    .tournament-details {
+      margin-top: 40px;
+    }
+    
+    .details-list {
+      list-style: none;
+      margin-top: 16px;
+    }
+    
+    .details-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+    }
+    
+    .details-list li:before {
+      content: '•';
+      color: var(--accent);
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    /* Discord Section */
+    .discord-section {
+      margin-top: 40px;
+      text-align: center;
+    }
+    
+    .discord-card {
+      background: linear-gradient(135deg, rgba(88, 101, 242, 0.1), rgba(88, 101, 242, 0.05));
+      border: 1px solid rgba(88, 101, 242, 0.2);
+      padding: 30px;
+      border-radius: 16px;
+      margin-top: 20px;
+    }
+    
+    /* Music Player Styles */
+    .music-player {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(11, 18, 32, 0.9);
+      border: 1px solid rgba(255, 183, 3, 0.3);
+      border-radius: 50px;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .music-player:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+    }
+    
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .music-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .music-btn:hover {
+      background: rgba(255, 183, 3, 0.1);
+      transform: scale(1.1);
+    }
+    
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .volume-slider {
+      width: 80px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    
+    .volume-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+    }
+    
+    .music-info {
+      font-size: 12px;
+      color: var(--muted);
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Autoplay Modal */
+    .autoplay-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(7, 16, 36, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+    
+    .autoplay-content {
+      background: var(--card);
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 400px;
+      border: 1px solid rgba(255, 183, 3, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .autoplay-content h3 {
+      color: var(--accent);
+      margin-bottom: 15px;
+    }
+    
+    .autoplay-content p {
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    
+    /* Particle Animation Styles */
+    .particle-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.4;
+      animation: particle-float 15s infinite linear;
+    }
+    
+    @keyframes particle-float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+      }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .hero, .contact {
+        grid-template-columns: 1fr;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .hero {
+        gap: 24px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .music-player {
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 10px;
+        padding: 8px 12px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats {
+        flex-direction: column;
+      }
+      
+      .cta {
+        flex-direction: column;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      .logo {
+        width: 48px;
+        height: 48px;
+      }
+      
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      
+      nav a {
+        margin-left: 0;
+      }
+      
+      .quick-links {
+        justify-content: center;
+      }
+      
+      .music-player {
+        width: 90%;
+        justify-content: center;
+      }
+      
+      .music-info {
+        display: none;
+      }
+      
+      .autoplay-content {
+        margin: 20px;
+        padding: 20px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 16px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .hero-card {
+        padding: 20px;
+      }
+      
+      .music-player {
+        padding: 6px 10px;
+        gap: 8px;
+      }
+      
+      .volume-slider {
+        width: 60px;
+      }
+    }
+    
+    /* Animation Classes */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease;
+    }
+    
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .slide-in-left {
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: all 0.6s ease;
+    }
+    
+    .slide-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .slide-in-right {
+      opacity: 0;
+      transform: translateX(50px);
+      transition: all 0.6s ease;
+    }
+    
+    .slide-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Security Badge */
+    .security-badge {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--success);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .security-badge i {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Music -->
+  <audio id="backgroundMusic" loop>
+    <source src="song/Tukoh Taka .mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  
+  <!-- Autoplay Modal -->
+  <div class="autoplay-modal" id="autoplayModal">
+    <div class="autoplay-content">
+      <h3>Welcome to BOOYAH APEX</h3>
+      <p>Click the button below to enable background music for the full tournament experience.</p>
+      <button class="btn btn-highlight" id="enableMusicBtn">
+        <i class="fas fa-play" style="margin-right: 8px;"></i> Enable Music
+      </button>
+    </div>
+  </div>
+  
+  <!-- Particle Animation Container -->
+  <div class="particle-container" id="particleContainer"></div>
+  
+  <div class="parallax-bg"></div>
+  <div class="floating-elements">
+    <div class="floating-element" style="width: 100px; height: 100px; top: 10%; left: 5%;"></div>
+    <div class="floating-element" style="width: 150px; height: 150px; top: 60%; left: 80%;"></div>
+    <div class="floating-element" style="width: 80px; height: 80px; top: 80%; left: 10%;"></div>
+    <div class="floating-element" style="width: 120px; height: 120px; top: 30%; left: 70%;"></div>
+  </div>
+  
+  <!-- Music Player -->
+  <div class="music-player">
+    <div class="music-controls">
+      <button class="music-btn" id="playPauseBtn">
+        <i class="fas fa-play"></i>
+      </button>
+      <button class="music-btn" id="muteBtn">
+        <i class="fas fa-volume-up"></i>
+      </button>
+    </div>
+    <div class="volume-control">
+      <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider" id="volumeSlider">
+    </div>
+    <div class="music-info" id="musicInfo">Click to play</div>
+  </div>
+  
+  <!-- Security Badge -->
+  <div class="security-badge">
+    <i class="fas fa-shield-alt"></i> Secured
+  </div>
+  
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">
+          <img src="https://i.postimg.cc/kMsf6tTy/Untitled-design-1.png" alt="BOOYAH APEX Logo" crossorigin="anonymous">
+        </div>
+        <div>
+          <div style="font-weight:800; font-size: 24px;">BOOYAH APEX</div>
+          <div style="font-size:12px;color:var(--muted)">Free Fire Tournament</div>
+        </div>
+      </div>
+      <nav>
+        <a href="#home">Home</a>
+        <a href="#tournament">Tournament</a>
+        <a href="#download">Download</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+    
+    <main>
+      <section class="hero">
+        <div class="hero-card fade-in">
+          <h1>BOOYAH APEX TOURNAMENT 2025</h1>
+          <p class="lead">Bangladesh's biggest Free Fire championship — Join with your team and win exciting prizes.</p>
+
+          <div class="cta">
+            <button class="btn btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Register Now</button>
+            <button class="btn btn-highlight" onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})">
+              <i class="fas fa-download" style="margin-right: 8px;"></i> Download App
+            </button>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div style="font-weight:800; font-size: 20px;">৳50,000</div>
+              <div style="font-size:12px;color:var(--muted)">Prize Pool</div>
+            </div>
+            <div class="stat">
+              <div style="font-weight:800; font-size: 20px;">256</div>
+              <div style="font-size:12px;color:var(--muted)">Teams Max</div>
+            </div>
+            <div class="stat">
+              <div style="font-weight:800; font-size: 20px;">Squad</div>
+              <div style="font-size:12px;color:var(--muted)">Battle Royale</div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="card slide-in-left">
+              <h3 style="margin-top:0"><i class="fas fa-bolt" style="color: var(--accent); margin-right: 8px;"></i> Lightning Fast</h3>
+              <p style="color:var(--muted);margin:8px 0 0">Optimized servers for lag-free gaming experience.</p>
+            </div>
+            <div class="card fade-in">
+              <h3 style="margin-top:0"><i class="fas fa-shield-alt" style="color: var(--accent); margin-right: 8px;"></i> Fair Play</h3>
+              <p style="color:var(--muted);margin:8px 0 0">Anti-cheat system ensures fair competition.</p>
+            </div>
+            <div class="card slide-in-right">
+              <h3 style="margin-top:0"><i class="fas fa-gem" style="color: var(--accent); margin-right: 8px;"></i> Exclusive Rewards</h3>
+              <p style="color:var(--muted);margin:8px 0 0">Win exclusive skins and in-game items.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside id="download" class="download">
+          <div class="hero-card slide-in-right">
+            <h3 style="margin:0">Download Tournament App</h3>
+            <p style="color:var(--muted);margin:8px 0">Register through the app, track live matches, and stay updated.</p>
+
+            <div class="apk">
+              <div style="flex:1">
+                <div style="font-weight:800">Android APK</div>
+                <div style="font-size:12px;color:var(--muted)">Version 1.0 • 13.3 MB</div>
+              </div>
+              <div>
+                <a href="https://github.com/Rabbi2004/mp3/raw/refs/heads/main/Booyah%20Apex_1.0.apk" class="btn btn-highlight" rel="noopener noreferrer">Download APK</a>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;font-size:13px;color:var(--muted)">If you don't have the app, you can register directly through our website.</div>
+          </div>
+
+          <div class="hero-card fade-in" style="text-align:center">
+            <h4 style="margin:0">Get In Touch</h4>
+            <p style="color:var(--muted);margin:8px 0"><i class="fas fa-envelope" style="margin-right: 8px;"></i> tagsamp@gmail.com</p>
+            <p style="color:var(--muted);margin:0"><i class="fas fa-phone" style="margin-right: 8px;"></i> 01XXXXXXXXX</p>
+            <p style="color:var(--muted);margin:0"><i class="fab fa-facebook" style="margin-right: 8px;"></i> @BOOYAHAPEX</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="tournament" class="tournament-details">
+        <div class="hero-card fade-in">
+          <h2 style="margin-top:0">Tournament Details</h2>
+          <ul class="details-list">
+            <li><strong>Date:</strong> May 2025</li>
+            <li><strong>Format:</strong> Squad Battle Royale</li>
+            <li><strong>Registration:</strong> First, form your team and then register.</li>
+            <li><strong>Prize:</strong> ৳50,000 Cash Prize + Exclusive In-game Items</li>
+            <li><strong>Eligibility:</strong> Any Free Fire player can participate</li>
+            <li><strong>Registration Fee:</strong> Free</li>
+            <li><strong>Deadline:</strong> September 30, 2025</li>
+          </ul>
+
+          <div style="margin-top:20px">
+            <button class="btn btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Register Now</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="discord-section">
+        <div class="hero-card">
+          <h2 style="margin-top:0">Join Our Discord Community</h2>
+          <p style="color:var(--muted);margin:8px 0">Connect with other players, get tournament updates, and participate in community events.</p>
+          <button class="btn btn-discord" style="margin-top:15px" onclick="window.open('https://discord.gg/XKVNYem3QN', '_blank', 'noopener,noreferrer')">
+            <i class="fab fa-discord" style="margin-right:8px"></i> Join Discord Server
+          </button>
+        </div>
+      </section>
+
+      <section id="contact" class="contact">
+        <div class="hero-card form fade-in">
+          <h3 style="margin-top:0">Contact / Registration</h3>
+          <p style="color:var(--muted);margin:6px 0">Fill in your details below — we'll contact the team leader.</p>
+          <form id="contactForm" onsubmit="return handleSubmit(event)">
+            <input type="text" id="name" placeholder="Full Name" required pattern="[A-Za-z\s]{2,50}" title="Please enter a valid name (2-50 characters, letters only)" />
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="tel" id="phone" placeholder="Phone Number" required pattern="[0-9+\-\s]{10,15}" title="Please enter a valid phone number" />
+            <input type="text" id="teamName" placeholder="Team Name" pattern="[A-Za-z0-9\s]{0,30}" title="Team name can only contain letters, numbers, and spaces (max 30 characters)" />
+            <select id="teamSize" required>
+              <option value="" disabled selected>Select Team Size</option>
+              <option value="solo">Solo</option>
+              <option value="duo">Duo</option>
+              <option value="squad">Squad (4 players)</option>
+            </select>
+            <textarea id="msg" rows="4" placeholder="Message (Optional)" maxlength="500"></textarea>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn btn-primary" type="submit" id="submitBtn">Submit Registration</button>
+              <button class="btn btn-outline" type="reset">Reset Form</button>
+            </div>
+            <div id="formMsg" style="margin-top:10px;font-weight:700"></div>
+          </form>
+        </div>
+
+        <div class="hero-card slide-in-right">
+          <h4 style="margin-top:0">Quick Links</h4>
+          <div class="quick-links">
+            <a href="#home">Home</a>
+            <a href="#tournament">Tournament</a>
+            <a href="#download">Download</a>
+            <a href="#contact">Contact</a>
+            <a href="#about">About Us</a>
+            <a href="#rules">Rules</a>
+            <a href="#faq">FAQ</a>
+            <a href="#sponsors">Sponsors</a>
+          </div>
+          
+          <h4 style="margin-top:14px">Follow Us</h4>
+          <div class="social-links">
+            <a href="https://www.facebook.com/booyahapex/" target="_blank" class="social-link facebook" rel="noopener noreferrer">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="https://discord.gg/XKVNYem3QN" target="_blank" class="social-link discord" rel="noopener noreferrer">
+              <i class="fab fa-discord"></i>
+            </a>
+            <a href="https://www.youtube.com/@GamingXFoysal" target="_blank" class="social-link youtube" rel="noopener noreferrer">
+              <i class="fab fa-youtube"></i>
+            </a>
+            <a href="https://instagram.com/BOOYAHAPEX" target="_blank" class="social-link instagram" rel="noopener noreferrer">
+              <i class="fab fa-instagram"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-content">
+        <div>© 2025 BOOYAH APEX Tournament. All rights reserved.</div>
+        <div class="developer-credit">
+          Developed by <a href="https://www.facebook.com/share/1DWZPRZcAS/" target="_blank" rel="noopener noreferrer"> Rabbi</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9bxMZHS1gIh1bxEcDkqqB1ZgBfYCjF6k",
+      authDomain: "booyah-apex-ec755.firebaseapp.com",
+      projectId: "booyah-apex-ec755",
+      storageBucket: "booyah-apex-ec755.firebasestorage.app",
+      messagingSenderId: "33365451297",
+      appId: "1:33365451297:web:b851669c714c17fbe13960"
+    };
+
+    // Firebase initialization with error handling
+    let db;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      console.log("Firebase initialized successfully");
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+      // Fallback: Store registrations locally if Firebase fails
+      console.log("Using local storage as fallback");
+    }
+
+    // Music Player Functionality
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const muteBtn = document.getElementById('muteBtn');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const musicInfo = document.getElementById('musicInfo');
+    const autoplayModal = document.getElementById('autoplayModal');
+    const enableMusicBtn = document.getElementById('enableMusicBtn');
+    const particleContainer = document.getElementById('particleContainer');
+
+    // Set initial volume
+    backgroundMusic.volume = 0.5;
+
+    // Particle Animation Functionality
+    function createParticles() {
+      // Clear existing particles
+      particleContainer.innerHTML = '';
+      
+      // Create 30 particles
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random size between 3px and 8px
+        const size = Math.random() * 5 + 3;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        particle.style.left = `${Math.random() * 100}%`;
+        
+        // Random animation duration between 10s and 25s
+        const duration = Math.random() * 15 + 10;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Random animation delay
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        
+        // Random opacity
+        particle.style.opacity = Math.random() * 0.5 + 0.2;
+        
+        // Random color variations based on theme
+        const colorVariations = [
+          'var(--accent)',
+          '#ff7b54',
+          '#ffd166',
+          '#ff9e6d'
+        ];
+        const randomColor = colorVariations[Math.floor(Math.random() * colorVariations.length)];
+        particle.style.background = randomColor;
+        
+        particleContainer.appendChild(particle);
+      }
+    }
+
+    // Show/hide particles based on music state
+    function toggleParticles(show) {
+      if (show) {
+        particleContainer.style.opacity = '1';
+      } else {
+        particleContainer.style.opacity = '0';
+      }
+    }
+
+    // Auto-play music when page loads with user interaction
+    document.addEventListener('DOMContentLoaded', function() {
+      // Create particles initially
+      createParticles();
+      
+      // Check if user has already enabled music
+      const musicEnabled = localStorage.getItem('booyahApexMusicEnabled');
+      
+      if (musicEnabled === 'true') {
+        // User has previously enabled music, try to autoplay
+        autoplayModal.style.display = 'none';
+        tryAutoplay();
+      } else {
+        // Show modal to request user interaction
+        autoplayModal.style.display = 'flex';
+      }
+    });
+
+    // Enable music button handler
+    enableMusicBtn.addEventListener('click', function() {
+      localStorage.setItem('booyahApexMusicEnabled', 'true');
+      autoplayModal.style.display = 'none';
+      tryAutoplay();
+    });
+
+    // Function to try autoplaying music
+    function tryAutoplay() {
+      // Create a promise for autoplay
+      const playPromise = backgroundMusic.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          // Autoplay started successfully
+          playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          musicInfo.textContent = 'Now Playing';
+          toggleParticles(true);
+          console.log('Music autoplay successful');
+        }).catch(error => {
+          // Autoplay was prevented
+          console.log('Autoplay prevented:', error);
+          musicInfo.textContent = 'Click play to start music';
+          
+          // Show a subtle notification that music is ready to play
+          setTimeout(() => {
+            musicInfo.textContent = 'Music ready - click play';
+          }, 1000);
+        });
+      }
+    }
+
+    // Play/Pause functionality
+    playPauseBtn.addEventListener('click', function() {
+      if (backgroundMusic.paused) {
+        backgroundMusic.play().then(() => {
+          playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          musicInfo.textContent = 'Now Playing';
+          toggleParticles(true);
+        }).catch(error => {
+          console.log('Play failed:', error);
+          musicInfo.textContent = 'Click to play';
+        });
+      } else {
+        backgroundMusic.pause();
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        musicInfo.textContent = 'Paused';
+        toggleParticles(false);
+      }
+    });
+
+    // Mute/Unmute functionality
+    muteBtn.addEventListener('click', function() {
+      if (backgroundMusic.muted) {
+        backgroundMusic.muted = false;
+        muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+        musicInfo.textContent = 'Volume On';
+      } else {
+        backgroundMusic.muted = true;
+        muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        musicInfo.textContent = 'Muted';
+      }
+    });
+
+    // Volume control
+    volumeSlider.addEventListener('input', function() {
+      backgroundMusic.volume = volumeSlider.value;
+      
+      // Update mute button icon based on volume level
+      if (backgroundMusic.volume == 0) {
+        muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+      } else if (backgroundMusic.volume < 0.5) {
+        muteBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+      } else {
+        muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+      }
+    });
+
+    // Update play/pause button based on music state
+    backgroundMusic.addEventListener('play', function() {
+      playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      musicInfo.textContent = 'Now Playing';
+      toggleParticles(true);
+    });
+
+    backgroundMusic.addEventListener('pause', function() {
+      playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+      if (!backgroundMusic.muted) {
+        musicInfo.textContent = 'Paused';
+      }
+      toggleParticles(false);
+    });
+
+    // Input sanitization function
+    function sanitizeInput(input) {
+      if (typeof input !== 'string') return '';
+      const div = document.createElement('div');
+      div.textContent = input;
+      return div.innerHTML.replace(/[<>]/g, '');
+    }
+
+    // Form validation function
+    function validateForm(name, email, phone, teamName, teamSize) {
+      const errors = [];
+      
+      // Name validation
+      if (!name || !/^[A-Za-z\s]{2,50}$/.test(name)) {
+        errors.push('Please enter a valid name (2-50 characters, letters only)');
+      }
+      
+      // Email validation
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Please enter a valid email address');
+      }
+      
+      // Phone validation
+      const cleanPhone = phone.replace(/\s/g, '');
+      if (!cleanPhone || !/^[0-9+\-]{10,15}$/.test(cleanPhone)) {
+        errors.push('Please enter a valid phone number (10-15 digits)');
+      }
+      
+      // Team name validation (optional)
+      if (teamName && !/^[A-Za-z0-9\s]{0,30}$/.test(teamName)) {
+        errors.push('Team name can only contain letters, numbers, and spaces (max 30 characters)');
+      }
+      
+      // Team size validation
+      if (!teamSize) {
+        errors.push('Please select a team size');
+      }
+      
+      return errors;
+    }
+
+    // Store registration locally (fallback)
+    function storeRegistrationLocally(registrationData) {
+      try {
+        const registrations = JSON.parse(localStorage.getItem('booyahApexRegistrations') || '[]');
+        registrations.push({
+          ...registrationData,
+          localTimestamp: new Date().toISOString(),
+          id: Date.now().toString()
+        });
+        localStorage.setItem('booyahApexRegistrations', JSON.stringify(registrations));
+        return true;
+      } catch (error) {
+        console.error("Error storing registration locally:", error);
+        return false;
+      }
+    }
+
+    // Form submission handler with enhanced security
+    async function handleSubmit(e) {
+      e.preventDefault();
+      
+      // Get form values and sanitize
+      const name = sanitizeInput(document.getElementById('name').value.trim());
+      const email = sanitizeInput(document.getElementById('email').value.trim());
+      const phone = sanitizeInput(document.getElementById('phone').value.trim());
+      const teamName = sanitizeInput(document.getElementById('teamName').value.trim());
+      const teamSize = document.getElementById('teamSize').value;
+      const message = sanitizeInput(document.getElementById('msg').value.trim());
+      
+      // Validate form
+      const validationErrors = validateForm(name, email, phone, teamName, teamSize);
+      
+      if (validationErrors.length > 0) {
+        showMessage(validationErrors.join('<br>'), 'error');
+        return false;
+      }
+      
+      // Show loading state
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+      submitBtn.disabled = true;
+      
+      try {
+        // Prepare registration data
+        const registrationData = {
+          name: name,
+          email: email,
+          phone: phone,
+          teamName: teamName || 'Not specified',
+          teamSize: teamSize,
+          message: message || 'No message',
+          userAgent: navigator.userAgent.substring(0, 100),
+          timestamp: new Date().toISOString()
+        };
+        
+        let success = false;
+        
+        // Try to save to Firebase
+        if (db) {
+          try {
+            await db.collection("registrations").add({
+              ...registrationData,
+              serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            success = true;
+            console.log("Registration saved to Firebase");
+          } catch (firebaseError) {
+            console.error("Firebase save error:", firebaseError);
+            // Fallback to local storage
+            success = storeRegistrationLocally(registrationData);
+          }
+        } else {
+          // Use local storage fallback
+          success = storeRegistrationLocally(registrationData);
+        }
+        
+        if (success) {
+          showMessage('Registration successful! We will contact you soon.', 'success');
+          document.getElementById('contactForm').reset();
+          
+          // Redirect to Discord after successful registration
+          setTimeout(() => {
+            window.open('https://discord.gg/booyahapex', '_blank', 'noopener,noreferrer');
+          }, 2000);
+        } else {
+          throw new Error('Failed to save registration');
+        }
+        
+      } catch (error) {
+        console.error("Error saving registration: ", error);
+        showMessage('There was an error submitting your registration. Please try again or contact us directly.', 'error');
+      } finally {
+        // Restore button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+      
+      return false;
+    }
+    
+    // Show message with appropriate styling
+    function showMessage(message, type) {
+      const messageEl = document.getElementById('formMsg');
+      messageEl.innerHTML = message;
+      messageEl.style.color = type === 'success' ? 'var(--success)' : 'var(--error)';
+      
+      // Clear message after 5 seconds
+      setTimeout(() => {
+        messageEl.innerHTML = '';
+      }, 5000);
+    }
+    
+    // Security headers for if served with server
+    function setSecurityHeaders() {
+      // This is a client-side demonstration - actual headers should be set server-side
+      console.log('Security headers should be configured on the server');
+      
+      // Check if page is served over HTTPS
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        console.warn('For better security, serve this site over HTTPS');
+      }
+    }
+    
+    // Scroll animations
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set security headers
+      setSecurityHeaders();
+      
+      // Create observer for scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+      
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, observerOptions);
+      
+      // Observe elements with animation classes
+      const animatedElements = document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right');
+      animatedElements.forEach(el => {
+        observer.observe(el);
+      });
+      
+      // Parallax effect for background
+      window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const parallaxBg = document.querySelector('.parallax-bg');
+        parallaxBg.style.transform = `translateY(${scrolled * 0.5}px)`;
+      });
+      
+      // Add floating elements dynamically
+      const floatingContainer = document.querySelector('.floating-elements');
+      for (let i = 0; i < 6; i++) {
+        const size = Math.random() * 80 + 40;
+        const element = document.createElement('div');
+        element.classList.add('floating-element');
+        element.style.width = `${size}px`;
+        element.style.height = `${size}px`;
+        element.style.top = `${Math.random() * 100}%`;
+        element.style.left = `${Math.random() * 100}%`;
+        element.style.animationDelay = `${Math.random() * 10}s`;
+        element.style.animationDuration = `${15 + Math.random() * 10}s`;
+        floatingContainer.appendChild(element);
+      }
+      
+      // Security check
+      console.log('Security features active: CSP, XSS protection, Input validation');
+    });
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+    
+    // Prevent right-click (optional security feature)
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+  </script>
+</body>
+</html>
